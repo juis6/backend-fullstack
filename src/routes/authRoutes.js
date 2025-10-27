@@ -25,9 +25,8 @@ router.post('/register', (req, res) => {
         insertTodo.run(result.lastInsertRowid, defaultTask)
 
         const token = jwt.sign({
-            id: result.lastInsertRowid,
-            expiresIn: '24h'
-        }, process.env.JWT_SECRET)
+            id: result.lastInsertRowid
+        }, process.env.JWT_SECRET, { expiresIn: '24h' })
 
         res.json({ token })
     } catch (err) {
@@ -36,7 +35,7 @@ router.post('/register', (req, res) => {
     }
 })
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
     const { username, password } = req.body
 
     try {
@@ -51,7 +50,7 @@ router.post('/login', (req, res) => {
                 .json({ message: 'User not found!' })
         }
 
-        const isValid = bcrypt.compare(password, user.password)
+        const isValid = await bcrypt.compare(password, user.password)
 
         if (!isValid) {
             return res
@@ -60,9 +59,8 @@ router.post('/login', (req, res) => {
         }
 
         const token = jwt.sign({
-            id: user.id,
-            expiresIn: '24h'
-        }, process.env.JWT_SECRET)
+            id: user.id
+        }, process.env.JWT_SECRET, { expiresIn: '24h' })
 
         res.json({ token })
     } catch (err) {
